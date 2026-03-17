@@ -19,6 +19,7 @@ ENV/
 .idea/
 *.swp
 *.swo
+*.db
 
 # OS files
 .DS_Store
