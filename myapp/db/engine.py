@@ -1,18 +1,38 @@
-from sqlmodel import create_engine,text
-from sqlalchemy.ext.asyncio import AsyncEngine
-from myapp.books.models import Book
-from sqlmodel import SQLModel
+import asyncpg
 from myapp.config import settings
+from typing import Optional
+
+# Global pool
+pool: Optional[asyncpg.Pool] = None
 
 
-engine = AsyncEngine(
-    create_engine(
-    url=settings.DATABASE_URL,
-    echo=True 
-))
-
-
+# -------------------------
+# Initialize DB Pool
+# -------------------------
 async def init_db():
-    async with engine.begin() as conn:
+    global pool
+    if pool is None:
+        pool = await asyncpg.create_pool(
+            dsn=settings.DATABASE_URL,
+            min_size=1,
+            max_size=10
+        )
 
-        await conn.run_sync(SQLModel.metadata.create_all)
+
+# -------------------------
+# Get Pool (SAFE ACCESS)
+# -------------------------
+def get_pool() -> asyncpg.Pool:
+    if pool is None:
+        raise RuntimeError("Database pool is not initialized. Call init_db() first.")
+    return pool
+
+
+# -------------------------
+# Close DB Pool
+# -------------------------
+async def close_db():
+    global pool
+    if pool:
+        await pool.close()
+        pool = None

@@ -1,18 +1,33 @@
 from pydantic import BaseModel,Field
-from typing import Annotated
+from typing import Annotated, Optional
+from datetime import date
 
-class Book(BaseModel):
-    id : Annotated[int,Field(description="ID of the book",ge=1)]
-    title : str 
-    author : str 
-    publisher : str 
-    published_date : str 
-    page_count : Annotated[int,Field(description="Number of pages in the book",ge=1)] 
-    language : str 
+# -------------------------
+# Base Schema (shared)
+# -------------------------
+class BookBase(BaseModel):
+    title: str
+    author: str
+    publisher: str
+    published_date: Optional[date] = None
+    page_count: Annotated[int, Field(ge=1)]
+    language: str
 
+
+# -------------------------
+# Create Schema (POST)
+# -------------------------
+class BookCreate(BookBase):
+    pass
+
+
+# -------------------------
+# Update Schema (PATCH)
+# -------------------------
 class BookUpdate(BaseModel):
-    title : str 
-    author : str 
-    publisher : str  
-    page_count : int 
-    language : str 
+    title: Optional[str] = None
+    author: Optional[str] = None
+    publisher: Optional[str] = None
+    published_date: Optional[date] = None
+    page_count: Optional[int] = Field(default=None, ge=1)
+    language: Optional[str] = None
