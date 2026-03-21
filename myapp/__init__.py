@@ -8,6 +8,8 @@ from myapp.users.models import create_users_table
 from myapp.books.routes import book_router
 from myapp.users.routes import auth_router
 
+
+
 @asynccontextmanager
 async def life_span(app : FastAPI):
     print("Server is starting...")

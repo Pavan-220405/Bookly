@@ -20,3 +20,8 @@ class UserResponse(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+
+
+class UserLogin(BaseModel):
+    email : Annotated[EmailStr,Field(description="Email of the user")]
+    password : Annotated[str,Field(description="Password for protection",min_length=7)]

@@ -2,9 +2,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    DB_HOST : str 
-    DB_PORT : str 
-    DB_NAME : str 
+    JWT_SECRET_KEY : str
+    JWT_ALGORITHM : str
+    ACCESS_TOKEN_EXPIRY : int
+    REFRESH_TOKEN_EXPIRY : int 
     DATABASE_URL : str 
 
 

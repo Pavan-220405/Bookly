@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException, Path, Depends, status
+from fastapi.responses import JSONResponse
 from asyncpg import Connection, UniqueViolationError
 
-from myapp.users.schemas import UserCreate, UserResponse
-from myapp.users.crud import crud_create_user
+from myapp.auth.utils import verify_password, create_access_token, create_refresh_token, decode_access_token, decode_refresh_token
+from myapp.users.schemas import UserCreate, UserResponse, UserLogin
+from myapp.users.crud import crud_create_user, crud_get_user_by_email
 from myapp.db.engine import get_pool
 
 
@@ -23,3 +25,28 @@ async def signup(new_user_data : UserCreate, conn : Connection = Depends(get_con
     
     except UniqueViolationError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail=f"User with email {new_user_data.email} already exists. Try Login")
+    
+
+@auth_router.post('/login')
+async def login(user_data : UserLogin, conn : Connection = Depends(get_conn)):
+    user = await crud_get_user_by_email(conn=conn,email=user_data.email)
+
+    if user:
+        password_valid = verify_password(user_data.password, user["hashed_password"])
+
+        if password_valid:
+            access_token = create_access_token(user_id=str(user["id"]))
+            refresh_token = create_refresh_token(user_id=str(user["id"]))
+
+            return JSONResponse(
+                content={
+                        "message" : "Login Successful",
+                        "access_token" : access_token,
+                        "refresh_token" : refresh_token,
+                        "user" : {
+                            "email" : user["email"],
+                            "id" : str(user["id"])
+                        }           
+            })
+    
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Email or Password")
