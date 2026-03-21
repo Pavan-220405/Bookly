@@ -1,12 +1,13 @@
 from asyncpg import Connection
 from typing import Optional
-from myapp.books.schemas import BookCreate
+from myapp.books.schemas import BookCreate, BookResponse
+from uuid import UUID
 
 
 # -----------------------
 # Create a book
 # -----------------------
-async def create_book(conn : Connection, book : BookCreate):
+async def crud_create_book(conn : Connection, book : BookCreate):
     query = """
         INSERT INTO books(title,author,publisher,published_date,page_count,language)
         VALUES ($1, $2, $3, $4, $5, $6)
@@ -28,7 +29,7 @@ async def create_book(conn : Connection, book : BookCreate):
 # ------------------------------------------
 # Get All (Pagination + Filters + Search)
 # ------------------------------------------
-async def get_books(conn : Connection, limit : int = 10, offset : int = 0, title : Optional[str] = None, author : Optional[str] = None, language : Optional[str] = None):
+async def crud_get_books(conn : Connection, limit : int = 10, offset : int = 0, title : Optional[str] = None, author : Optional[str] = None, language : Optional[str] = None):
     conditions = []
     values = []
 
@@ -67,8 +68,7 @@ async def get_books(conn : Connection, limit : int = 10, offset : int = 0, title
 # -----------------
 # Delete 
 # -----------------
-async def delete_book(conn : Connection, book_id : int):
-    query = "DELETE FROM books WHERE id = $1;"
-    result = await conn.execute(query,book_id)
-    
-    return result == "DELETE 1"
+async def crud_delete_book(conn : Connection, book_id : UUID):
+    query = "DELETE FROM books WHERE id = $1 RETURNING *;"
+    row = await conn.fetchrow(query,book_id)
+    return dict(row) if row else None

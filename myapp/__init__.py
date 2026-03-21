@@ -1,10 +1,12 @@
 from fastapi import FastAPI
-from myapp.books.routes import book_router
 from contextlib import asynccontextmanager
 
 from myapp.db.engine import init_db, close_db, get_pool
 from myapp.books.models import create_books_table
+from myapp.users.models import create_users_table
 
+from myapp.books.routes import book_router
+from myapp.users.routes import auth_router
 
 @asynccontextmanager
 async def life_span(app : FastAPI):
@@ -14,8 +16,10 @@ async def life_span(app : FastAPI):
     await init_db()
 
     # Create tables
-    await create_books_table(get_pool())
-    print("Databases initialized !!!")
+    pool = get_pool()
+    await create_books_table(pool=pool)
+    await create_users_table(pool=pool)
+    print("Databases and Tables initialized !!!")
 
     yield
 
@@ -33,9 +37,9 @@ app = FastAPI(
     )
 
 
-
 @app.get('/',tags=["Health Check"])
 async def health_check():
     return {"status" : "Bookly API Running Successfully"} 
 
 app.include_router(book_router,prefix=f"/api/{version}/books",tags=['Books'])
+app.include_router(auth_router,prefix=f"/api/{version}/users",tags=['Users'])

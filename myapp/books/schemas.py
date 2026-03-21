@@ -1,6 +1,7 @@
 from pydantic import BaseModel,Field
 from typing import Annotated, Optional
 from datetime import date
+from uuid import UUID
 
 # -------------------------
 # Base Schema (shared)
@@ -31,3 +32,14 @@ class BookUpdate(BaseModel):
     published_date: Optional[date] = None
     page_count: Optional[int] = Field(default=None, ge=1)
     language: Optional[str] = None
+
+
+
+class BookResponse(BaseModel):
+    id: UUID
+    title: str
+    author: str
+    publisher: str
+    published_date: Optional[date]
+    page_count: int
+    language: str
