@@ -6,6 +6,7 @@ from myapp.auth.utils import verify_password, create_access_token, create_refres
 from myapp.users.schemas import UserCreate, UserResponse, UserLogin
 from myapp.users.crud import crud_create_user, crud_get_user_by_email
 from myapp.db.engine import get_pool
+from myapp.auth.dependencies import RefreshTokenBearer
 
 
 async def get_conn():
@@ -15,6 +16,7 @@ async def get_conn():
 
 
 auth_router = APIRouter()
+refresh_token_bearer = RefreshTokenBearer()
 
 
 @auth_router.post('/signup',status_code=status.HTTP_201_CREATED,response_model=UserResponse)
@@ -50,3 +52,10 @@ async def login(user_data : UserLogin, conn : Connection = Depends(get_conn)):
             })
     
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Email or Password")
+
+
+@auth_router.post('/refresh_token')
+async def new_access_token(user_id = Depends(refresh_token_bearer)):
+
+    new_access_token = create_access_token(user_id=user_id)
+    return {"new_access_token" : new_access_token}

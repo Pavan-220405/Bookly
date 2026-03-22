@@ -1,6 +1,6 @@
 from asyncpg import Connection
 from typing import Optional
-from myapp.books.schemas import BookCreate, BookResponse
+from myapp.books.schemas import BookCreate
 from uuid import UUID
 
 

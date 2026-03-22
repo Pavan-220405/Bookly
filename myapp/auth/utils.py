@@ -71,7 +71,7 @@ def decode_access_token(token : str):
     try:
         payload = jwt.decode(jwt=token,key=settings.JWT_SECRET_KEY,algorithms=[settings.JWT_ALGORITHM])
         if payload.get("type") != "access":
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Token Type")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Token Type, Provide Access Token")
         if "sub" not in payload:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid token payload")
         return payload
@@ -90,7 +90,7 @@ def decode_refresh_token(token : str):
     try:
         payload = jwt.decode(jwt=token,key=settings.JWT_SECRET_KEY,algorithms=[settings.JWT_ALGORITHM])
         if payload.get("type") != "refresh":
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Token Type")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Token Type, Provide Refresh Token")
         if "sub" not in payload or "jti" not in payload:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Refresh Token")
         return payload
@@ -98,4 +98,4 @@ def decode_refresh_token(token : str):
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Token Expired")
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Refresh Token")
