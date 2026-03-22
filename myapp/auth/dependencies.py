@@ -12,7 +12,7 @@ class AccessTokenBearer(HTTPBearer):
     def __init__(self, auto_error = True):
         super().__init__(auto_error=auto_error)
     
-    async def __call__(self, request : Request) -> dict:
+    async def __call__(self, request : Request) -> dict:            # __call__() makes an object behave like a function
         creds = await super().__call__(request)
 
         token = creds.credentials

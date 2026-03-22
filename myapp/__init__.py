@@ -21,8 +21,8 @@ async def life_span(app : FastAPI):
 
     # Create tables
     pool = get_pool()
-    await create_books_table(pool=pool)
-    await create_users_table(pool=pool)
+    # await create_books_table(pool=pool) --> Done by Alembic
+    # await create_users_table(pool=pool) --> Done by Alembic
     print("Databases and Tables initialized !!!")
 
     yield

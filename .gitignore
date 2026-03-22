@@ -58,7 +58,8 @@ htmlcov/
 *.temp
 
 # Alembic (ignore if not using migrations)
-alembic/versions/
+# keep migrations, ignore cache only
+alembic/versions/*.pyc
 
 # Docker (optional)
 *.pid
