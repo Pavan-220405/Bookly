@@ -1,23 +1,16 @@
-from fastapi import APIRouter, HTTPException, Path, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.responses import JSONResponse
 from asyncpg import Connection, UniqueViolationError
 
 from myapp.auth.utils import verify_password, create_access_token, create_refresh_token
 from myapp.users.schemas import UserCreate, UserResponse, UserLogin
 from myapp.users.crud import crud_create_user, crud_get_user_by_email
-from myapp.db.engine import get_pool
-from myapp.auth.dependencies import RefreshTokenBearer
+from myapp.auth.dependencies import access_token_bearer, refresh_token_bearer, get_conn, get_curr_user
 from myapp.db.redis_engine import add_jti_to_blocklist
 
 
-async def get_conn():
-    pool = get_pool()
-    async with pool.acquire() as conn:
-        yield conn 
-
 
 auth_router = APIRouter()
-refresh_token_bearer = RefreshTokenBearer()
 
 
 @auth_router.post('/signup',status_code=status.HTTP_201_CREATED,response_model=UserResponse)
@@ -69,3 +62,10 @@ async def revoke_token(token_details = Depends(refresh_token_bearer)):
     await add_jti_to_blocklist(jti=jti)
 
     return {"message" : "Logged Out Successfully"}
+
+
+@auth_router.get('/me',response_model=UserResponse)
+async def current_user(user = Depends(get_curr_user)):
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User Not found")
+    return user

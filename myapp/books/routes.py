@@ -5,20 +5,11 @@ from asyncpg import UniqueViolationError
 
 from myapp.books.schemas import BookCreate, BookResponse
 from myapp.books.crud import crud_create_book,crud_delete_book,crud_get_books
-from myapp.db.engine import get_pool
-from myapp.auth.dependencies import AccessTokenBearer
+from myapp.auth.dependencies import AccessTokenBearer, get_conn
 
 
 book_router = APIRouter()
 access_token_bearer = AccessTokenBearer()
-
-
-# Dependency function
-async def get_conn():
-    pool = get_pool()
-    async with pool.acquire() as conn:
-        yield conn  
-
 
 
 # Get books

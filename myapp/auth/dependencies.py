@@ -1,8 +1,11 @@
 from fastapi.security import HTTPBearer
-from fastapi import HTTPException, Request, status
+from fastapi import Depends, HTTPException, Request, status
+from asyncpg import Connection
 
 from myapp.auth.utils import decode_access_token, decode_refresh_token
 from myapp.db.redis_engine import token_in_blocklist
+from myapp.users.crud import crud_get_user_by_id
+from myapp.db.engine import get_pool
 
 
 # -----------------------------
@@ -19,6 +22,8 @@ class AccessTokenBearer(HTTPBearer):
         payload = decode_access_token(token)
 
         return payload
+access_token_bearer = AccessTokenBearer()
+
 
 
 # -----------------------------
@@ -38,4 +43,23 @@ class RefreshTokenBearer(HTTPBearer):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Refresh token revoked. Please login again")
         
         return payload
+refresh_token_bearer = RefreshTokenBearer()
 
+
+
+# ---------------------------
+# Connection Dependency
+# ---------------------------
+async def get_conn():
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        yield conn
+
+
+# ----------------------------
+# Current User Dependency
+# ----------------------------
+async def get_curr_user(token_details : dict = Depends(access_token_bearer), conn : Connection = Depends(get_conn)):
+    user_id = token_details["sub"]
+    
+    return await crud_get_user_by_id(conn=conn, id=user_id)
