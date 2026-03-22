@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 
@@ -20,8 +20,14 @@ class UserResponse(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    role : str 
 
 
 class UserLogin(BaseModel):
     email : Annotated[EmailStr,Field(description="Email of the user")]
     password : Annotated[str,Field(description="Password for protection",min_length=7)]
+
+
+class UserToken(BaseModel):
+    user_id : Annotated[str,Field(description="ID of the user converted from uuid to str")] 
+    role : Annotated[Literal["user","admin"],Field(description="Role of the current user : user/admin")]

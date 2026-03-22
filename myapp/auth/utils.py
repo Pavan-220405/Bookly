@@ -4,7 +4,7 @@ import jwt
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta, timezone
 from myapp.config import settings
-
+from myapp.users.schemas import UserToken
 
 # -----------------------------
 # Password Hashing
@@ -29,13 +29,14 @@ def verify_password(password : str, hashed_password : str) -> bool:
 # -----------------------------
 # Create Access Token
 # -----------------------------
-def create_access_token(user_id : str, expiry_time : timedelta = None):
+def create_access_token(user_details : UserToken, expiry_time : timedelta = None):
     "Function to get access tokens"
 
     now = datetime.now(timezone.utc)
     expiry = now + (expiry_time if expiry_time else timedelta(minutes=settings.ACCESS_TOKEN_EXPIRY))
     payload = {
-        "sub" : str(user_id),
+        "sub" : str(user_details.user_id),
+        "role" : user_details.role,
         "iat": int(now.timestamp()),
         "exp" : int(expiry.timestamp()),
         "type" : "access"
@@ -47,13 +48,14 @@ def create_access_token(user_id : str, expiry_time : timedelta = None):
 # -----------------------------
 # Create Refresh Token
 # -----------------------------
-def create_refresh_token(user_id : str, expiry_time : timedelta = None):
-    "Function to get Refresh tokens"
+def create_refresh_token(user_details : UserToken, expiry_time : timedelta = None):
+    "Function to get Refresh tokens" 
 
     now = datetime.now(timezone.utc)
     expiry = now + (expiry_time if expiry_time else timedelta(days=settings.REFRESH_TOKEN_EXPIRY))
     payload = {
-        "sub" : str(user_id),
+        "sub" : str(user_details.user_id),
+        "role" : user_details.role,
         "exp" : int(expiry.timestamp()),
         "iat": int(now.timestamp()),
         "type" : "refresh",

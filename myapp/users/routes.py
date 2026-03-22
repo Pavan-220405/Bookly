@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from asyncpg import Connection, UniqueViolationError
 
 from myapp.auth.utils import verify_password, create_access_token, create_refresh_token
-from myapp.users.schemas import UserCreate, UserResponse, UserLogin
+from myapp.users.schemas import UserCreate, UserResponse, UserLogin, UserToken
 from myapp.users.crud import crud_create_user, crud_get_user_by_email
 from myapp.auth.dependencies import access_token_bearer, refresh_token_bearer, get_conn, get_curr_user
 from myapp.db.redis_engine import add_jti_to_blocklist
@@ -31,8 +31,8 @@ async def login(user_data : UserLogin, conn : Connection = Depends(get_conn)):
         password_valid = verify_password(user_data.password, user["hashed_password"])
 
         if password_valid:
-            access_token = create_access_token(user_id=str(user["id"]))
-            refresh_token = create_refresh_token(user_id=str(user["id"]))
+            access_token = create_access_token(user_details=UserToken(user_id=str(user["id"]),role=user["role"]))
+            refresh_token = create_refresh_token(user_details=UserToken(user_id=str(user["id"]),role=user["role"]))
 
             return JSONResponse(
                 content={
@@ -51,7 +51,7 @@ async def login(user_data : UserLogin, conn : Connection = Depends(get_conn)):
 @auth_router.post('/refresh_token')
 async def new_access_token(token_details = Depends(refresh_token_bearer)):
 
-    new_access_token = create_access_token(user_id=token_details["sub"])
+    new_access_token = create_access_token(user_details=UserToken(user_id=str(token_details["sub"]), role=token_details["role"]))
     return {"new_access_token" : new_access_token}
 
 
