@@ -6,9 +6,11 @@ from asyncpg import UniqueViolationError
 from myapp.books.schemas import BookCreate, BookResponse
 from myapp.books.crud import crud_create_book,crud_delete_book,crud_get_books
 from myapp.db.engine import get_pool
+from myapp.auth.dependencies import AccessTokenBearer
 
 
 book_router = APIRouter()
+access_token_bearer = AccessTokenBearer()
 
 
 # Dependency function
@@ -23,9 +25,10 @@ async def get_conn():
 @book_router.get('/',response_model=List[BookResponse])
 async def get_books(limit : int = Query(default=10,ge=1), offset : int = Query(default=0,ge=0),
                     title : Optional[str] = Query(default=None), author : Optional[str] = Query(default=None),
-                    language : Optional[str] = Query(default=None), conn = Depends(get_conn)
+                    language : Optional[str] = Query(default=None), 
+                    conn = Depends(get_conn), user_credentials = Depends(access_token_bearer)
                 ):
-    return await crud_get_books(conn=conn, limit=limit, offset=offset, title=title, author=author, language=language) 
+    return await crud_get_books(conn=conn, limit=limit, offset=offset, title=title, author=author, language=language)
 
 
 
