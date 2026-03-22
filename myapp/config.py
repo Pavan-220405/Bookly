@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRY : int
     REFRESH_TOKEN_EXPIRY : int 
     DATABASE_URL : str 
+    REDIS_HOST : str = "localhost"
+    REDIS_PORT : int = 6379
+    JTI_EXPIRY : int = 60
 
 
     model_config = SettingsConfigDict(
@@ -19,4 +22,6 @@ settings = Settings()
 
 if __name__ == "__main__":
     print(settings.DATABASE_URL)
-    print(settings.DB_NAME)
+    print(settings.REDIS_HOST)
+    print(settings.REDIS_PORT)
+    print(settings.JTI_EXPIRY)

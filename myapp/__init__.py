@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
 from myapp.db.engine import init_db, close_db, get_pool
+from myapp.db.redis_engine import init_redis, get_redis, close_redis
 from myapp.books.models import create_books_table
 from myapp.users.models import create_users_table
 
@@ -16,6 +17,7 @@ async def life_span(app : FastAPI):
 
     # Initialize pool
     await init_db()
+    await init_redis()
 
     # Create tables
     pool = get_pool()
@@ -27,6 +29,7 @@ async def life_span(app : FastAPI):
 
     print("Server is shutting down...")
     await close_db()
+    await close_redis()
 
 
 
