@@ -31,3 +31,7 @@ class UserLogin(BaseModel):
 class UserToken(BaseModel):
     user_id : Annotated[str,Field(description="ID of the user converted from uuid to str")] 
     role : Annotated[Literal["user","admin"],Field(description="Role of the current user : user/admin")]
+
+
+class UserAdmin(BaseModel):
+    email : Annotated[EmailStr,Field(description="Email of the new user to make him as admin")] 

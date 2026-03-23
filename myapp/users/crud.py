@@ -1,8 +1,9 @@
 from asyncpg import Connection
 from uuid import UUID
+from pydantic import EmailStr
 
 from myapp.users.schemas import UserCreate
-from myapp.auth.utils import hash_password, verify_password
+from myapp.auth.utils import hash_password
 
 async def crud_create_user(conn : Connection, new_user_data : UserCreate):
     create_user_query = """
@@ -50,3 +51,15 @@ async def crud_delete_user_by_id(conn: Connection, id: UUID):
     """
     row = await conn.fetchrow(query, id)
     return dict(row) if row else None
+
+
+async def crud_make_user_admin(conn : Connection, user_email : EmailStr):
+    query = """
+            UPDATE users
+            SET role = 'admin'
+            WHERE email = $1
+            RETURNING *;
+        """
+    row = await conn.fetchrow(query,user_email)
+    return dict(row) if row else None
+    

@@ -62,21 +62,19 @@ async def get_conn():
 # Current User Dependency
 # ----------------------------
 async def get_curr_user(token_details : dict = Depends(access_token_bearer), conn : Connection = Depends(get_conn)):
-    user_id = token_details["sub"]
     
-    return await crud_get_user_by_id(conn=conn, id=user_id)
+    return await crud_get_user_by_id(conn=conn, id=token_details["id"])
 
 
 # ----------------------------
 # Role checker Dependency
 # ----------------------------
-# class RoleChecker:
-#     def __init__(self, allowed_roles : List[str]) -> None:
-#         self.allowed_roles = allowed_roles
+class RoleChecker:
+    def __init__(self, allowed_roles : List[str]) -> None:
+        self.allowed_roles = allowed_roles
     
-#     async def __call__(self, current_user = Depends(get_curr_user)):
-#         if current_user.role in self.allowed_roles:
-#             return True
+    async def __call__(self, current_user = Depends(get_curr_user)):
+        if current_user["role"] in self.allowed_roles:
+            return True
         
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="You are not permitted to perform this action")
-# role_checker = RoleChecker()
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="You are not permitted to perform this action")

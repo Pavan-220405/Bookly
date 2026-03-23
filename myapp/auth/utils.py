@@ -35,7 +35,7 @@ def create_access_token(user_details : UserToken, expiry_time : timedelta = None
     now = datetime.now(timezone.utc)
     expiry = now + (expiry_time if expiry_time else timedelta(minutes=settings.ACCESS_TOKEN_EXPIRY))
     payload = {
-        "sub" : str(user_details.user_id),
+        "id" : str(user_details.user_id),
         "role" : user_details.role,
         "iat": int(now.timestamp()),
         "exp" : int(expiry.timestamp()),
@@ -54,7 +54,7 @@ def create_refresh_token(user_details : UserToken, expiry_time : timedelta = Non
     now = datetime.now(timezone.utc)
     expiry = now + (expiry_time if expiry_time else timedelta(days=settings.REFRESH_TOKEN_EXPIRY))
     payload = {
-        "sub" : str(user_details.user_id),
+        "id" : str(user_details.user_id),
         "role" : user_details.role,
         "exp" : int(expiry.timestamp()),
         "iat": int(now.timestamp()),
@@ -74,7 +74,7 @@ def decode_access_token(token : str):
         payload = jwt.decode(jwt=token,key=settings.JWT_SECRET_KEY,algorithms=[settings.JWT_ALGORITHM])
         if payload.get("type") != "access":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Token Type, Provide Access Token")
-        if "sub" not in payload:
+        if "id" not in payload:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid token payload")
         return payload
     
@@ -93,7 +93,7 @@ def decode_refresh_token(token : str):
         payload = jwt.decode(jwt=token,key=settings.JWT_SECRET_KEY,algorithms=[settings.JWT_ALGORITHM])
         if payload.get("type") != "refresh":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Token Type, Provide Refresh Token")
-        if "sub" not in payload or "jti" not in payload:
+        if "id" not in payload or "jti" not in payload:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Refresh Token")
         return payload
     
