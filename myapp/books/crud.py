@@ -7,10 +7,10 @@ from uuid import UUID
 # -----------------------
 # Create a book
 # -----------------------
-async def crud_create_book(conn : Connection, book : BookCreate):
+async def crud_create_book(conn : Connection, book : BookCreate, user_id : UUID):
     query = """
-        INSERT INTO books(title,author,publisher,published_date,page_count,language)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO books(title,author,publisher,published_date,page_count,language,user_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *;
     """
 
@@ -21,7 +21,8 @@ async def crud_create_book(conn : Connection, book : BookCreate):
             book.publisher,
             book.published_date,
             book.page_count,
-            book.language
+            book.language,
+            user_id
         )
     return dict(row) if row else None 
     
@@ -68,7 +69,7 @@ async def crud_get_books(conn : Connection, limit : int = 10, offset : int = 0, 
 # -----------------
 # Delete 
 # -----------------
-async def crud_delete_book(conn : Connection, book_id : UUID):
-    query = "DELETE FROM books WHERE id = $1 RETURNING *;"
-    row = await conn.fetchrow(query,book_id)
+async def crud_delete_book(conn : Connection, book_id : UUID, user_id : UUID):
+    query = "DELETE FROM books WHERE id = $1 AND user_id = $2 RETURNING *;"
+    row = await conn.fetchrow(query,book_id,user_id)
     return dict(row) if row else None

@@ -20,15 +20,17 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
+
     op.execute("""
             ALTER TABLE books
-            ADD COLUMN user_id UUID 
-            REFERENCES users(id) ON DELETE CASCADE;
+            ADD COLUMN user_id UUID
+            REFERENCES users(id);
 """)
 
 
 def downgrade() -> None:
     """Downgrade schema."""
+    
     op.execute("""
             ALTER TABLE books
             DROP COLUMN user_id;

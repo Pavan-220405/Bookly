@@ -5,11 +5,10 @@ from asyncpg import UniqueViolationError
 
 from myapp.books.schemas import BookCreate, BookResponse
 from myapp.books.crud import crud_create_book,crud_delete_book,crud_get_books
-from myapp.auth.dependencies import AccessTokenBearer, get_conn
+from myapp.auth.dependencies import get_conn, get_curr_user, access_token_bearer
 
 
 book_router = APIRouter()
-access_token_bearer = AccessTokenBearer()
 
 
 # Get books
@@ -25,16 +24,18 @@ async def get_books(limit : int = Query(default=10,ge=1), offset : int = Query(d
 
 # Create a book
 @book_router.post('/',response_model=BookResponse,status_code=status.HTTP_201_CREATED)
-async def create_book(book : BookCreate, conn = Depends(get_conn),token_details = Depends(access_token_bearer)):
+async def create_book(book : BookCreate, conn = Depends(get_conn),current_user = Depends(get_curr_user)):
     try:
-        return await crud_create_book(conn=conn, book=book)
+        return await crud_create_book(conn=conn, book=book, user_id=current_user["id"])
     except UniqueViolationError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Book already exists")
 
+
+
 # Delete a book 
 @book_router.delete('/{id}')
-async def delete_book(id : UUID = Path(...,description="ID of the book to be deleted"), conn = Depends(get_conn),token_details = Depends(access_token_bearer)):
-    result = await crud_delete_book(conn=conn, book_id=id)
+async def delete_book(id : UUID = Path(...,description="ID of the book to be deleted"), conn = Depends(get_conn),current_user = Depends(get_curr_user)):
+    result = await crud_delete_book(conn=conn, book_id=id, user_id=current_user["id"])
 
     if result: 
         return {"message" : "Book deleted Successfully"}

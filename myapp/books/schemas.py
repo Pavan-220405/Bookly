@@ -37,6 +37,7 @@ class BookUpdate(BaseModel):
 
 class BookResponse(BaseModel):
     id: UUID
+    user_id : UUID
     title: str
     author: str
     publisher: str
