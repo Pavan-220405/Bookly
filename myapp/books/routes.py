@@ -17,7 +17,7 @@ access_token_bearer = AccessTokenBearer()
 async def get_books(limit : int = Query(default=10,ge=1), offset : int = Query(default=0,ge=0),
                     title : Optional[str] = Query(default=None), author : Optional[str] = Query(default=None),
                     language : Optional[str] = Query(default=None), 
-                    conn = Depends(get_conn), token_details = Depends(access_token_bearer)
+                    conn = Depends(get_conn)
                 ):
     return await crud_get_books(conn=conn, limit=limit, offset=offset, title=title, author=author, language=language)
 
