@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Path,status, HTTPException, Query, Depends
 from typing import Optional, List
 from uuid import UUID
-from asyncpg import UniqueViolationError
+from asyncpg import Connection, UniqueViolationError
 
 from myapp.books.schemas import BookCreate, BookResponse
-from myapp.books.crud import crud_create_book,crud_delete_book,crud_get_books
+from myapp.books.crud import crud_create_book,crud_delete_book,crud_get_books, crud_get_books_of_user
 from myapp.auth.dependencies import get_conn, get_curr_user, access_token_bearer
 
 
@@ -40,3 +40,12 @@ async def delete_book(id : UUID = Path(...,description="ID of the book to be del
     if result: 
         return {"message" : "Book deleted Successfully"}
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Book {id} doesn't exist")
+
+
+# Get my books
+@book_router.get('/my_books')
+async def get_my_books(user_details : dict = Depends(get_curr_user), conn : Connection = Depends(get_conn)):
+    books = await crud_get_books_of_user(conn=conn,user_id=user_details["id"])
+    if books:
+        return books
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"No Books owned by the user {user_details['email']}")

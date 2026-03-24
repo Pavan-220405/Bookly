@@ -73,8 +73,8 @@ class RoleChecker:
     def __init__(self, allowed_roles : List[str]) -> None:
         self.allowed_roles = allowed_roles
     
-    async def __call__(self, current_user = Depends(get_curr_user)):
-        if current_user["role"] in self.allowed_roles:
+    async def __call__(self, token_details = Depends(access_token_bearer)):
+        if token_details["role"] in self.allowed_roles:
             return True
         
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="You are not permitted to perform this action")

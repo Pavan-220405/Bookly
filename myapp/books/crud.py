@@ -73,3 +73,13 @@ async def crud_delete_book(conn : Connection, book_id : UUID, user_id : UUID):
     query = "DELETE FROM books WHERE id = $1 AND user_id = $2 RETURNING *;"
     row = await conn.fetchrow(query,book_id,user_id)
     return dict(row) if row else None
+
+
+
+# ------------------------------
+# Get Books owned by an user 
+# ------------------------------
+async def crud_get_books_of_user(conn : Connection, user_id : UUID):
+    query = "SELECT * FROM books WHERE user_id = $1;"
+    rows = await conn.fetch(query,user_id)
+    return [dict(row) for row in rows]

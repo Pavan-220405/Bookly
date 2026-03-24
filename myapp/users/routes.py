@@ -6,7 +6,7 @@ from pydantic import EmailStr
 from myapp.auth.utils import verify_password, create_access_token, create_refresh_token
 from myapp.users.schemas import UserCreate, UserResponse, UserLogin, UserToken, UserAdmin
 from myapp.users.crud import crud_create_user, crud_get_user_by_email, crud_make_user_admin
-from myapp.auth.dependencies import access_token_bearer, refresh_token_bearer, get_conn, get_curr_user, RoleChecker
+from myapp.auth.dependencies import refresh_token_bearer, get_conn, get_curr_user, RoleChecker
 from myapp.db.redis_engine import add_jti_to_blocklist
 
 
@@ -70,15 +70,15 @@ async def revoke_token(token_details = Depends(refresh_token_bearer)):
 
 
 
-@auth_router.get('/me',response_model=UserResponse)
-async def current_user(user = Depends(get_curr_user), admin : bool = Depends(admin_checker)):
+@auth_router.get('/me',response_model=UserResponse,dependencies=[Depends(admin_checker)])
+async def current_user(user = Depends(get_curr_user)):
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User Not found")
     return user
 
 
-@auth_router.post('/make_admin')
-async def make_admin(new_user_email : UserAdmin, admin : bool = Depends(admin_checker), conn : Connection = Depends(get_conn)):
+@auth_router.post('/make_admin',dependencies=[Depends(admin_checker)])
+async def make_admin(new_user_email : UserAdmin, conn : Connection = Depends(get_conn)):
     result = await crud_make_user_admin(conn=conn , user_email=new_user_email.email)
 
     if result: 
