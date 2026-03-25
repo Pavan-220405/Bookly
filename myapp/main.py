@@ -6,6 +6,7 @@ from myapp.db.redis_engine import init_redis, close_redis
 
 from myapp.books.routes import book_router
 from myapp.users.routes import auth_router
+from myapp.reviews.routes import review_router
 
 
 
@@ -19,8 +20,6 @@ async def life_span(app : FastAPI):
 
     # Create tables
     pool = get_pool()
-    # await create_books_table(pool=pool) --> Done by Alembic
-    # await create_users_table(pool=pool) --> Done by Alembic
     print("Databases and Tables initialized !!!")
 
     yield
@@ -46,3 +45,4 @@ async def health_check():
 
 app.include_router(book_router,prefix=f"/api/{version}/books",tags=['Books'])
 app.include_router(auth_router,prefix=f"/api/{version}/users",tags=['Users'])
+app.include_router(review_router,prefix=f"/api/{version}/reviews",tags=['Reviews'])
