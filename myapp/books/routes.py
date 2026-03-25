@@ -39,7 +39,7 @@ async def delete_book(id : UUID = Path(...,description="ID of the book to be del
 
     if result: 
         return {"message" : "Book deleted Successfully"}
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Book {id} doesn't exist")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Book {id} doesn't exist or you don't own this book")
 
 
 # Get my books
