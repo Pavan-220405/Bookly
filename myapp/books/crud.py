@@ -1,6 +1,6 @@
 from asyncpg import Connection
 from typing import Optional
-from myapp.books.schemas import BookCreate
+from myapp.books.schemas import BookCreate, BookUpdate
 from uuid import UUID
 
 
@@ -72,6 +72,46 @@ async def crud_get_books(conn : Connection, limit : int = 10, offset : int = 0, 
 async def crud_delete_book(conn : Connection, book_id : UUID, user_id : UUID):
     query = "DELETE FROM books WHERE id = $1 AND user_id = $2 RETURNING *;"
     row = await conn.fetchrow(query,book_id,user_id)
+    return dict(row) if row else None
+
+
+# -----------------
+# Update
+# -----------------
+async def crud_update_book(conn: Connection, book_id: UUID, user_id: UUID, book: BookUpdate):
+    fields = []
+    values = []
+
+    if book.title is not None:
+        fields.append(f"title = ${len(values) + 1}")
+        values.append(book.title)
+    if book.author is not None:
+        fields.append(f"author = ${len(values) + 1}")
+        values.append(book.author)
+    if book.publisher is not None:
+        fields.append(f"publisher = ${len(values) + 1}")
+        values.append(book.publisher)
+    if book.published_date is not None:
+        fields.append(f"published_date = ${len(values) + 1}")
+        values.append(book.published_date)
+    if book.page_count is not None:
+        fields.append(f"page_count = ${len(values) + 1}")
+        values.append(book.page_count)
+    if book.language is not None:
+        fields.append(f"language = ${len(values) + 1}")
+        values.append(book.language)
+
+    if not fields:
+        return None
+
+    values.extend([book_id, user_id])
+    query = f"""
+        UPDATE books
+        SET {", ".join(fields)}
+        WHERE id = ${len(values) - 1} AND user_id = ${len(values)}
+        RETURNING *;
+    """
+    row = await conn.fetchrow(query, *values)
     return dict(row) if row else None
 
 

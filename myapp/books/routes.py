@@ -3,8 +3,8 @@ from typing import Optional, List
 from uuid import UUID
 from asyncpg import Connection, UniqueViolationError
 
-from myapp.books.schemas import BookCreate, BookResponse
-from myapp.books.crud import crud_create_book,crud_delete_book,crud_get_books, crud_get_books_of_user
+from myapp.books.schemas import BookCreate, BookResponse, BookUpdate
+from myapp.books.crud import crud_create_book,crud_delete_book,crud_get_books, crud_get_books_of_user, crud_update_book
 from myapp.auth.dependencies import get_conn, get_curr_user, access_token_bearer
 
 
@@ -40,6 +40,23 @@ async def delete_book(id : UUID = Path(...,description="ID of the book to be del
     if result: 
         return {"message" : "Book deleted Successfully"}
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Book {id} doesn't exist or you don't own this book")
+
+
+# Update a book
+@book_router.patch('/{id}', response_model=BookResponse)
+async def update_book(
+    book: BookUpdate,
+    id: UUID = Path(..., description="ID of the book to be updated"),
+    conn = Depends(get_conn),
+    current_user = Depends(get_curr_user),
+):
+    result = await crud_update_book(conn=conn, book_id=id, user_id=current_user["id"], book=book)
+    if result:
+        return result
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Book {id} doesn't exist, you don't own this book, or no fields were provided"
+    )
 
 
 # Get my books
