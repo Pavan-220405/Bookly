@@ -68,3 +68,7 @@ alembic/versions/*.pyc
 # Secrets / keys
 *.pem
 *.key
+
+
+alembic.ini
+*.cfg
